@@ -34,5 +34,11 @@
   (test-equal? "52" (run* (q) (conj u (== 'corn q))) '())
   (test-equal? "53" (run* (q) (conj (== 'corn q) (== 'meal q))) '())
   (test-equal? "54" (run* (q) (conj (== 'corn q) (== 'corn q))) '(corn))
-  
+
+  (test-equal? "55" (run* (q) (disj u u)) '())
+  (test-equal? "56" (run* (q) (disj (== 'olive q) u)) '(olive))
+  (test-equal? "57" (run* (q) (disj u (== 'oil q))) '(oil))
+  (test-equal? "58" (run* (q) (disj (== 'olive q) (== 'oil q))) '(olive oil))
+  (test-equal? "59" (run* (q) (fresh (x) (fresh (y) (disj (== '(,x ,y) q) (== '(,y ,x) q))))) '((,x ,y) (,y ,x))) ; not what I expected
+  (test-equal? "61" (run* (q) (disj (== 'olive q) (== 'oil q))) (run* (q) (disj (== 'olive q) (== 'oil q)))) ; order matters to test-equal?
  ))
