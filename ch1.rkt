@@ -41,4 +41,9 @@
   (test-equal? "58" (run* (q) (disj (== 'olive q) (== 'oil q))) '(olive oil))
   (test-equal? "59" (run* (q) (fresh (x) (fresh (y) (disj (== '(,x ,y) q) (== '(,y ,x) q))))) '((,x ,y) (,y ,x))) ; not what I expected
   (test-equal? "61" (run* (q) (disj (== 'olive q) (== 'oil q))) (run* (q) (disj (== 'olive q) (== 'oil q)))) ; order matters to test-equal?
+
+  (test-equal? "62" (run* (x) (disj (conj (== 'olive x) u) (== 'oil x))) '(oil))
+  (test-equal? "63" (run* (x) (disj (conj (== 'olive x) s) (== 'oil x))) '(oil olive)) ; I expected '(olive oil) must be something with cKanren/miniKanren
+  (test-equal? "64" (run* (x) (disj (== 'olive x) (conj (== 'oil x) s))) '(olive oil)) ; different than book, must be something with cKanren/miniKanren
+  (test-equal? "65" (run* (x) (disj (conj (== 'virgin x) u) (disj (== 'olive x) (disj s (== 'oil x))))) '(_.0 olive oil)) ; again different than book
  ))
