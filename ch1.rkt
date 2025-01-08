@@ -4,8 +4,19 @@
 (define s (== #t #t))
 (define u (== #t #f))
 
+; https://github.com/rymaju/mykanren/blob/c56318625319b598c0e05cf993e8aafabee83187/mykanren.rkt#L360C1-L366C34
+(define-syntax defrel
+  (syntax-rules ()
+    ((defrel (name x ...) g ...)
+     (define (name x ...)
+       (lambda (s)
+         (lambda ()
+           ((conj g ...) s)))))))
+
 (require (except-in rackunit fail))
 (require rackunit/text-ui)
+
+(defrel (teacup t) (disj (== 'tea t) (== 'cup t)))
 
 (run-tests
  (test-suite "chapter 1"
@@ -54,4 +65,7 @@
   (test-equal? "76" (run* (x y) (disj (conj (== 'split x) (== 'pea y)) (conj (== 'red x) (== 'bean y)))) '((split pea) (red bean)))
   (test-equal? "80" (run* (x y z) (disj (conj (== 'split x) (== 'pea y)) (conj (== 'red x) (== 'bean y))) (== 'soup z)) '((split pea soup) (red bean soup)))
   (test-equal? "81" (run* (x y) (== 'split x) (== 'pea y)) '((split pea)))
+
+  ; teacup is defrel outside of run-tests
+  (test-equal? "83" (run* (x) (teacup x)) '(tea cup))
  ))
