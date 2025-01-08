@@ -39,11 +39,19 @@
   (test-equal? "56" (run* (q) (disj (== 'olive q) u)) '(olive))
   (test-equal? "57" (run* (q) (disj u (== 'oil q))) '(oil))
   (test-equal? "58" (run* (q) (disj (== 'olive q) (== 'oil q))) '(olive oil))
-  (test-equal? "59" (run* (q) (fresh (x) (fresh (y) (disj (== '(,x ,y) q) (== '(,y ,x) q))))) '((,x ,y) (,y ,x))) ; not what I expected
+  (test-equal? "59" (run* (q) (fresh (x) (fresh (y) (disj (== (cons x y) q) (== (cons y x) q))))) '((_.0 . _.1) (_.0 . _.1))) ; not what I expected
   (test-equal? "61" (run* (q) (disj (== 'olive q) (== 'oil q))) (run* (q) (disj (== 'olive q) (== 'oil q)))) ; order matters to test-equal?
 
   (test-equal? "62" (run* (x) (disj (conj (== 'olive x) u) (== 'oil x))) '(oil))
   (test-equal? "63" (run* (x) (disj (conj (== 'olive x) s) (== 'oil x))) '(oil olive)) ; I expected '(olive oil) must be something with cKanren/miniKanren
   (test-equal? "64" (run* (x) (disj (== 'olive x) (conj (== 'oil x) s))) '(olive oil)) ; different than book, must be something with cKanren/miniKanren
   (test-equal? "65" (run* (x) (disj (conj (== 'virgin x) u) (disj (== 'olive x) (disj s (== 'oil x))))) '(_.0 olive oil)) ; again different than book
+
+  (test-equal? "67" (run* (r) (fresh (x) (fresh (y) (conj (== 'split x) (conj (== 'pea y) (== (cons x y) r)))))) '((split . pea)))
+  (test-equal? "70" (run* (r) (fresh (x y) (conj (== 'split x) (conj (== 'pea y) (== (cons x y) r))))) '((split . pea)))
+  (test-equal? "72" (run* (r x y) (conj (conj (== 'split x) (== 'pea y)) (== (cons x y) r))) '(((split . pea) split pea))) ; ((r1 x1 y1) ...)
+  (test-equal? "75" (run* (x y) (conj (== 'split x) (== 'pea y))) '((split pea)))
+  (test-equal? "76" (run* (x y) (disj (conj (== 'split x) (== 'pea y)) (conj (== 'red x) (== 'bean y)))) '((split pea) (red bean)))
+  (test-equal? "80" (run* (x y z) (disj (conj (== 'split x) (== 'pea y)) (conj (== 'red x) (== 'bean y))) (== 'soup z)) '((split pea soup) (red bean soup)))
+  (test-equal? "81" (run* (x y) (== 'split x) (== 'pea y)) '((split pea)))
  ))
