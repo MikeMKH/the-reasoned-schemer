@@ -71,4 +71,9 @@
   (test-equal? "85" (run* (x y) (teacup x) (teacup y)) '((tea tea) (cup tea) (tea cup) (cup cup)))
   (test-equal? "86" (run* (x y) (teacup x) (teacup x)) '((tea _.0) (cup _.0)))
   (test-equal? "87" (run* (x y) (disj (conj (teacup x) (teacup x)) (conj (== #f x) (teacup y)))) '((tea _.0) (cup _.0) (#f tea) (#f cup)))
+
+  (test-equal? "88" (run* (x y) (conde ((== 'split x) (== 'pea y)) ((== 'red x) (== 'bean y)))) '((split pea) (red bean)))
+  (test-equal? "89" (run* (x) (conde ((== 'olive x) u) ((== 'oil x)))) '(oil))
+  (test-equal? "90" (run* (x y) (conde ((fresh (z) (== 'lentil z))) ((== x y)))) '((_.0 _.0) (_.0 _.1)))
+  (test-equal? "91" (run* (x y) (conde ((== 'split x) (== 'pea y)) ((== 'red x) (== 'bean y)) ((== 'green x) (== 'lentil y)))) '((split pea) (red bean) (green lentil)))
  ))
