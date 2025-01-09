@@ -68,4 +68,7 @@
 
   ; teacup is defrel outside of run-tests
   (test-equal? "83" (run* (x) (teacup x)) '(tea cup))
+  (test-equal? "85" (run* (x y) (teacup x) (teacup y)) '((tea tea) (cup tea) (tea cup) (cup cup)))
+  (test-equal? "86" (run* (x y) (teacup x) (teacup x)) '((tea _.0) (cup _.0)))
+  (test-equal? "87" (run* (x y) (disj (conj (teacup x) (teacup x)) (conj (== #f x) (teacup y)))) '((tea _.0) (cup _.0) (#f tea) (#f cup)))
  ))
