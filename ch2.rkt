@@ -30,6 +30,15 @@
   (caro p a)
   (cdro p d))
 
+; 33
+(defrel (nullo x)
+  (== x '()))
+
+; 46
+(defrel (pairo p)
+  (fresh (a d)
+    (conso a d p)))
+
 (run-tests
  (test-suite "chapter 2"
   (test-equal? "1" (car '(grape rasin pear)) 'grape)
@@ -55,4 +64,26 @@
   (test-equal? "19" (run* (l) (conso '(a b c) '(d e) l)) '(((a b c) d e)))
   (test-equal? "20" (run* (x) (conso x '(a b c) '(d a b c))) '(d))
   (test-equal? "22" (run* (x) (conso x (cons 'a (cons x '(c))) (append '(d a) (cons x '(c))))) '(d))
+
+  (test-equal? "28" (null? '(grape rasin pear)) #f)
+  (test-equal? "29" (null? '()) #t)
+
+  ; nullo is defrel outside of run-tests
+  (test-equal? "30" (run* (q) (nullo '(grape rasin pear))) '())
+  (test-equal? "31" (run* (q) (nullo '())) '(_.0))
+  (test-equal? "32" (run* (x) (nullo x)) '(()))
+
+  (test-equal? "36" (pair? '((split) . pea)) #t)
+  (test-equal? "37" (pair? '()) #f)
+  (test-equal? "41" (car '(pear)) 'pear)
+  (test-equal? "42" (cdr '(pear)) '())
+  (test-equal? "43" (cons '(split) 'pea) '((split) . pea))
+  (test-equal? "44" (run* (r) (fresh (x y) (== (cons x (cons y 'salad)) r))) '((_.0 _.1 . salad)))
+
+  ; pairo is defrel outside of run-tests
+  (test-equal? "47" (run* (q) (pairo (cons q q))) '(_.0))
+  (test-equal? "48" (run* (q) (pairo '())) '())
+  (test-equal? "49" (run* (q) (pairo 'pair)) '())
+  (test-equal? "50" (run* (x) (pairo x)) '((_.0 . _.1)))
+  (test-equal? "51" (run* (r) (pairo (cons r '()))) '(_.0))
  ))
