@@ -39,6 +39,18 @@
   (fresh (a d)
     (conso a d p)))
 
+; 58
+(define (singleton? l)
+  (cond
+    ((pair? l) (null? (cdr l)))
+    (else #f)))
+
+; 68
+(defrel (singletono l)
+  (fresh (d)
+    (cdro l d)
+    (nullo d)))
+
 (run-tests
  (test-suite "chapter 2"
   (test-equal? "1" (car '(grape rasin pear)) 'grape)
@@ -86,4 +98,15 @@
   (test-equal? "49" (run* (q) (pairo 'pair)) '())
   (test-equal? "50" (run* (x) (pairo x)) '((_.0 . _.1)))
   (test-equal? "51" (run* (r) (pairo (cons r '()))) '(_.0))
+
+  ; singleton? define outside of run-tests
+  (test-equal? "60" (singleton? '()) #f)
+  (test-equal? "61" (singleton? (cons 'pea '())) #t)
+  (test-equal? "62" (singleton? '(vegan-yogurt)) #t)
+
+  ; singletono defrel outside of run-tests
+  (test-equal? "extra 60" (run* (q) (singletono '())) '())
+  (test-equal? "extra 61" (run* (q) (singletono (cons 'pea '()))) '(_.0))
+  (test-equal? "extra 62" (run* (q) (singletono '(vegan-yogurt))) '(_.0))
+  (test-equal? "extra 32" (run* (x) (singletono x)) '((_.0)))
  ))
