@@ -59,15 +59,35 @@
 
 ; 22
 (defrel (lolo l)
-  (conde
-   ((nullo l))
-   ((fresh (a)
-     (caro l a)
-     (listo a)
-     (fresh (d)
-       (cdro l d)
-       (lolo d))))))
+     (conde
+      ((nullo l))
+      ((fresh (a)
+        (caro l a)
+        (listo a)
+        (fresh (d)
+          (cdro l d)
+          (lolo d))))))
 
+; 32
+#|(defrel (singletono l)
+  (fresh (a)
+    (== `(,a) l)))
+|#
+(defrel (singletono l)
+  (fresh (d)
+     (cdro l d)
+     (nullo d)))
+; 33
+#| (defrel (lolo l)
+     (conde
+        ((nullo l))
+        ((fresh (a)
+           (caro l a)
+           (singletono a))
+         (fresh (d)
+            (cdro l d)
+            (lolo d)))))
+ |#
 (run-tests
  (test-suite "chapter 3"
   (test-equal? "2" (list? '()) #t)
@@ -87,4 +107,9 @@
   (test-equal? "26" (run 1 (x) (lolo (append '((a b) (c d)) x))) '(()))
   (test-equal? "27" (run 5 (x) (lolo (append '((a b) (c d)) x))) '(() (()) ((_.0)) (() ()) ((_.0 _.1))))
   (test-equal? "29" (run 5 (x) (lolo x)) '(() (()) ((_.0)) (() ()) ((_.0 _.1))))
+  (test-equal? "34" (run 1 (z) (lolo `((g) . ,z))) '(()))
+  (test-equal? "38" (run 5 (z) (lolo `((g) . ,z))) '(() (()) ((_.0)) (() ()) ((_.0 _.1))))
+  (test-equal? "41" (run 4 (r) (fresh (w x y z) (lolo `((g) (e . ,w) (,x . ,y) . ,z)) (== `(,w (,x . ,y) ,z) r))) '((() (_.0) ()) (() (_.0 _.1) ()) ((_.0) (_.1) ()) (() (_.0) (()))))
+
+  
  ))
