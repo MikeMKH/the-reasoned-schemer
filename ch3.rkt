@@ -88,6 +88,22 @@
             (cdro l d)
             (lolo d)))))
  |#
+
+; 44
+(define (member? x l)
+  (cond
+    ((null? l) #f)
+    ((equal? (car l) x) #t)
+    (#t (member? x (cdr l)))))
+
+; 47
+(defrel (membero x l)
+  (conde
+     ((caro l x))
+     ((fresh (d)
+       (cdro l d)
+       (membero x d)))))
+
 (run-tests
  (test-suite "chapter 3"
   (test-equal? "2" (list? '()) #t)
@@ -111,5 +127,23 @@
   (test-equal? "38" (run 5 (z) (lolo `((g) . ,z))) '(() (()) ((_.0)) (() ()) ((_.0 _.1))))
   (test-equal? "41" (run 4 (r) (fresh (w x y z) (lolo `((g) (e . ,w) (,x . ,y) . ,z)) (== `(,w (,x . ,y) ,z) r))) '((() (_.0) ()) (() (_.0 _.1) ()) ((_.0) (_.1) ()) (() (_.0) (()))))
 
+  ; membero is defrel outside of run-tests
+  (test-equal? "44" (member? 'olive '(virgin olive oil)) #t)
+  (test-equal? "48" (run* (q) (membero 'olive '(virgin olive oil))) '(_.0))
+  (test-equal? "49" (run 1 (y) (membero y '(hummus with pita))) '(hummus))
+  (test-equal? "50" (run 1 (y) (membero y '(with pita))) '(with))
+  (test-equal? "51" (run 1 (y) (membero y '(pita))) '(pita))
+  (test-equal? "52" (run 1 (y) (membero y '())) '())
+  (test-equal? "53" (run* (y) (membero y '(hummus with pita))) '(hummus with pita))
+  (test-equal? "56" (run* (x) (membero 'e `(pata ,x fagioli))) '(e))
+  (test-equal? "59" (run 1 (x) (membero 'e `(pata e ,x fagioli))) '(_.0))
+  (test-equal? "60" (run 1 (x) (membero 'e `(pata ,x fagioli))) '(e))
+  (test-equal? "61" (run* (x y) (membero 'e `(pata ,x fagioli ,y))) '((e _.0) (_.0 e)))
+  (test-equal? "63" (run* (q) (fresh (x y) (== `(pata ,x fagioli ,y) q) (membero 'e q))) '((pata e fagioli _.0) (pata _.0 fagioli e)))
+  (test-equal? "64" (run 1 (l) (membero 'tofu l)) '((tofu . _.0)))
+  ;(test-equal? "66" (run* (l) (membero 'tofu l)) '(lots-of-things)) ; will cause an endless loop
+  (test-equal? "67" (run 5 (l) (membero 'tofu l)) '((tofu . _.0) (_.0 tofu . _.1) (_.0 _.1 tofu . _.2) (_.0 _.1 _.2 tofu . _.3) (_.0 _.1 _.2 _.3 tofu . _.4)))
+
+  ; proper-membero is defrel outside of run-tests
   
  ))
