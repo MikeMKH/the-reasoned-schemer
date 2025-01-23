@@ -104,6 +104,17 @@
        (cdro l d)
        (membero x d)))))
 
+; 73
+(defrel (proper-membero x l)
+  (conde
+   ((caro l x)
+    (fresh (d)
+      (cdro l d)
+      (listo d)))
+   ((fresh (d)
+      (cdro l d)
+      (proper-membero x d)))))
+
 (run-tests
  (test-suite "chapter 3"
   (test-equal? "2" (list? '()) #t)
@@ -145,5 +156,5 @@
   (test-equal? "67" (run 5 (l) (membero 'tofu l)) '((tofu . _.0) (_.0 tofu . _.1) (_.0 _.1 tofu . _.2) (_.0 _.1 _.2 tofu . _.3) (_.0 _.1 _.2 _.3 tofu . _.4)))
 
   ; proper-membero is defrel outside of run-tests
-  
+  (test-equal? "74" (run 3 (l) (proper-membero 'tofu l)) '((tofu) (tofu _.0) (tofu _.0 _.1))) ; changed from run 12 in text, who needs that many results
  ))
