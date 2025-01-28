@@ -32,6 +32,29 @@
       (conso a res out)
       (appendo d t res)))))
 
+; 43
+(defrel (swappendo l t out)
+  (conde
+    ((fresh (a d res)
+       (conso a d l)
+       (conso a res out)
+       (swappendo d t res)))
+    ((nullo l) (== t out))))
+
+; 45
+(define (unwrap x)
+  (cond
+    ((pair? x) (unwrap (car x)))
+    (#t x)))
+
+; 47
+(defrel (unwrapo x out)
+  (conde
+    ((fresh (a)
+       (caro x a)
+       (unwrapo a out)))
+    ((== x out))))
+
 (run-tests
  (test-suite "chapter 4"
   (test-equal? "1" (append '(a b c) '(d e)) '(a b c d e))
@@ -94,4 +117,27 @@
      ((cake & ice cream) (d t))
      ((cake & ice cream d) (t))
      ((cake & ice cream d t) ())))
+
+  ; swappendo is defrel outside of run-tests
+  (test-equal? "44" (run 6 (x y) (swappendo x y '(cake & ice cream d t)))
+    ; same output as 37
+    ; swapping two conde lines does not affect the values contributed by conde
+    '((() (cake & ice cream d t))
+     ((cake) (& ice cream d t))
+     ((cake &) (ice cream d t))
+     ((cake & ice) (cream d t))
+     ((cake & ice cream) (d t))
+     ((cake & ice cream d) (t))))
+
+  ; unwrap is define outside of run-tests
+  (test-equal? "45" (unwrap '((((pizza))))) 'pizza)
+  (test-equal? "46" (unwrap '((((pizza pie) with)) gralic)) 'pizza)
+
+  ; unwrapo is defrel outside of run-tests
+  (test-equal? "47" (run* (x) (unwrapo '((((pizza)))) x)) '(((((pizza)))) (((pizza))) ((pizza)) (pizza) pizza))
+  (test-equal? "50" (run 1 (x) (unwrapo 'pizza x)) '(pizza))
+  (test-equal? "51" (run 1 (x) (unwrapo `((,x)) 'pizza)) '(pizza))
+  (test-equal? "52" (run 5 (x) (unwrapo x 'pizza)) '(pizza (pizza . _.0) ((pizza . _.0) . _.1) (((pizza . _.0) . _.1) . _.2) ((((pizza . _.0) . _.1) . _.2) . _.3)))
+  (test-equal? "53" (run 5 (x) (unwrapo x '((pizza)))) '(((pizza)) (((pizza)) . _.0) ((((pizza)) . _.0) . _.1) (((((pizza)) . _.0) . _.1) . _.2) ((((((pizza)) . _.0) . _.1) . _.2) . _.3)))
+  (test-equal? "54" (run 5 (x) (unwrapo `((,x)) 'pizza)) '(pizza (pizza . _.0) ((pizza . _.0) . _.1) (((pizza . _.0) . _.1) . _.2) ((((pizza . _.0) . _.1) . _.2) . _.3)))
  ))
