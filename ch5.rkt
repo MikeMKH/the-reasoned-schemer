@@ -31,6 +31,24 @@
       (cdro l d)
       (memo x d out)))))
 
+; 23
+(define (rember x l)
+  (cond
+    ((null? l) '())
+    ((equal? (car l) x) (cdr l))
+    (#t (cons (car l)
+              (rember x (cdr l))))))
+
+; 25
+(defrel (rembero x l out)
+  (conde
+     ((nullo l) (== '() out))
+     ((conso x out l))
+      ((fresh (a d res)
+         (conso a d l)
+         (conso a res out)
+         (rembero x d res)))))
+
 (run-tests
  (test-suite "chapter 5"
   ; mem is define outside of run-tests
@@ -55,4 +73,31 @@
      ((fig . _.0) (fig . _.0))
      ((fig . _.0) (_.1 fig . _.0))
      ((fig . _.0) (_.1 _.2 fig . _.0))))
+
+  ; rember is define outside of run-tests
+  (test-equal? "24" (rember 'pea '(a b pea d pea e)) '(a b d pea e))
+
+  ; rembero is defrel outside of run-tests
+  (test-equal? "26" (run* (out) (rembero 'pea '(pea) out)) '(() (pea)))
+  (test-equal? "27" (run* (out) (rembero 'pea '(pea pea) out)) '((pea) (pea) (pea pea)))
+  (test-equal? "28" (run* (out) (fresh (y z) (rembero y `(a b ,y d ,z e) out)))
+    '((b a d _.0 e)
+     (a b d _.0 e)
+     (a b d _.0 e)
+     (a b d _.0 e)
+     (a b _.0 d e)
+     (a b e d _.0)
+     (a b _.0 d _.1 e)))
+  (test-equal? "48" (run* (y z) (rembero y `(,y d ,z e) `(,y d e))) '((d d) (d d) (_.0 _.0) (e e)))
+  (test-equal? "56" (run 4 (y z w out) (rembero y `(,z . ,w) out))
+    '((_.0 _.0 _.1 _.1)
+     (_.0 _.1 () (_.1))
+     (_.0 _.1 (_.0 . _.2) (_.1 . _.2))
+     (_.0 _.1 (_.2) (_.1 _.2))))
+  (test-equal? "61" (run 5 (y z w out) (rembero y `(,z . ,w) out))
+    '((_.0 _.0 _.1 _.1)
+     (_.0 _.1 () (_.1))
+     (_.0 _.1 (_.0 . _.2) (_.1 . _.2))
+     (_.0 _.1 (_.2) (_.1 _.2))
+     (_.0 _.1 (_.2 _.0 . _.3) (_.1 _.2 . _.3))))
  ))
