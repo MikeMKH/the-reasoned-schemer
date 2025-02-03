@@ -22,6 +22,19 @@
    (s)
    ((alwayso))))
 
+; 14
+(defrel (nevero)
+  (nevero))
+
+; 24
+(defrel (very-recursiveo)
+  (conde
+   ((nevero))
+   ((very-recursiveo))
+   ((alwayso))
+   ((very-recursiveo))
+   ((nevero))))
+
 (run-tests
  (test-suite "chapter 6"
   ; alwayso is defrel outside of run-tests
@@ -37,4 +50,17 @@
   (test-equal? "11" (run 1 (q) (conde ((== 'garlic q) (alwayso)) ((== 'onion q))) (== 'onion q)) '(onion))
   ;(test-equal? "12" (run 2 (q) (conde ((== 'garlic q) (alwayso)) ((== 'onion q))) (== 'onion q)) '(onion endlessly-nothing))
   (test-equal? "13" (run 5 (q) (conde ((== 'garlic q) (alwayso)) ((== 'onion q) (alwayso))) (== 'onion q)) '(onion onion onion onion onion))
+
+  ; nevero is defrel outside of run-tests
+  ;(test-equal? "16" (run 1 (q) (nevero)) '(endlessly))
+  (test-equal? "17" (run 1 (q) u (nevero)) '())
+  (test-equal? "18" (run 1 (q) (conde (s) ((nevero)))) '(_.0))
+  (test-equal? "19" (run 1 (q) (conde ((nevero)) (s))) '(_.0))
+  ;(test-equal? "20" (run 2 (q) (conde (s) ((nevero)))) '(_.0 endlessly))
+  ;(test-equal? "21" (run 1 (q) (conde (s) ((nevero))) u) '(endlessly))
+  (test-equal? "22" (run 5 (q) (conde ((nevero)) ((alwayso)) ((nevero)))) '(_.0 _.0 _.0 _.0 _.0))
+  (test-equal? "23" (run 6 (q) (conde ((== 'spicy q)(nevero)) ((== 'hot q)(nevero)) ((== 'apple q) (alwayso)) ((== 'cider q)(alwayso)))) '(apple cider apple cider apple cider))
+
+  ; very-recursiveo is defrel outside of run-tests and is very silly
+  (test-equal? "25 only 3" (run 3 (q) (very-recursiveo)) '(_.0 _.0 _.0))
  ))
