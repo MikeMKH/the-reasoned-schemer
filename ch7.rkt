@@ -53,6 +53,16 @@
      (cons 0 (build-num (/ n 2))))
     ((zero? n) '())))
 
+; 77
+(defrel (poso n)
+  (fresh (a d)
+    (== `(,a . ,d) n)))
+
+; 83
+(defrel (>1o n)
+  (fresh (a ad dd)
+    (== `(,a ,ad . ,dd) n)))
+
 (run-tests
  (test-suite "chapter 7"
   ; bit-xoro is defrel outside of run-tests
@@ -90,4 +100,17 @@
   (test-equal? "30" (build-num 19) '(1 1 0 0 1))
   (test-equal? "31" (build-num 1729) '(1 0 0 0 0 0 1 1 0 1 1))
   (test-equal? "40" (build-num 36) '(0 0 1 0 0 1))
+
+  ; poso is defrel outside of run-tests
+  (test-equal? "77" (run* (q) (poso '(0 1 1))) '(_.0))
+  (test-equal? "78" (run* (q) (poso '(1))) '(_.0))
+  (test-equal? "79" (run* (q) (poso '())) '())
+  (test-equal? "80" (run* (r) (poso r)) '((_.0 . _.1)))
+
+  ; >1o is defrel outside of run-tests
+  (test-equal? "83" (run* (q) (>1o '(0 1 1))) '(_.0))
+  (test-equal? "84" (run* (q) (>1o '(0 1))) '(_.0))
+  (test-equal? "85" (run* (q) (>1o '(1))) '())
+  (test-equal? "86" (run* (q) (>1o '())) '())
+  (test-equal? "87" (run* (r) (>1o r)) '((_.0 _.1 . _.2)))
  ))
