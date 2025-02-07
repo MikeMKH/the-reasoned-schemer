@@ -63,6 +63,29 @@
   (fresh (a ad dd)
     (== `(,a ,ad . ,dd) n)))
 
+; 104
+(defrel (addero b n m r)
+  (conde
+   ((== 0 b) (== '() m) (== n r))
+   ((== 0 b) (== '() n) (== m r) (poso m))
+   ((== 1 b) (== '() m) (addero 0 n '(1) r))
+   ((== 1 b) (== '() n) (poso m) (addero 0 '(1) m r))
+   ((== '(1) n) (== '(1) m)
+     (fresh (a c)
+       (== `(,a ,c) r)
+       (full-addero b 1 1 a c)))
+   ((== '(1) n) (gen-addero b n m r))
+   ((== '(1) m) (>1o n) (>1o r) (addero b '(1) n r))
+   ((>1o n) (gen-addero b n m r))))
+
+(defrel (gen-addero b n m r)
+  (fresh (a c d e x y z)
+    (== `(,a . ,x) n)
+    (== `(,d . ,y) m) (poso y)
+    (== `(,c . ,z) r) (poso z)
+    (full-addero b a d c e)
+    (addero e x y z)))
+
 (run-tests
  (test-suite "chapter 7"
   ; bit-xoro is defrel outside of run-tests
@@ -113,4 +136,17 @@
   (test-equal? "85" (run* (q) (>1o '(1))) '())
   (test-equal? "86" (run* (q) (>1o '())) '())
   (test-equal? "87" (run* (r) (>1o r)) '((_.0 _.1 . _.2)))
+
+  ; addero is defrel outside of run-tests
+  (test-equal? "90" (run 3 (x y r) (addero 0 x y r)) '((_.0 () _.0) (() (_.0 . _.1) (_.0 . _.1)) ((1) (1) (0 1))))
+  (test-equal? "112" (run* (x y) (addero 0 x y '(1 0 1)))
+    '(((1 0 1) ())
+      (() (1 0 1))
+      ((1) (0 0 1))
+      ((0 0 1) (1))
+      ((0 1) (1 1))
+      ((1 1) (0 1))))
+
+  ; gen-addero is defrel outside of run-tests
+  (test-equal? "106" (run* (s) (gen-addero 1 '(0 1 1) '(1 1) s)) '((0 1 0 1)))
  ))
