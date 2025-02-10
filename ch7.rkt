@@ -86,6 +86,14 @@
     (full-addero b a d c e)
     (addero e x y z)))
 
+; 114
+(defrel (+o n m k)
+  (addero 0 n m k))
+
+; 116
+(defrel (-o n m k)
+  (+o m k n))
+
 (run-tests
  (test-suite "chapter 7"
   ; bit-xoro is defrel outside of run-tests
@@ -149,4 +157,21 @@
 
   ; gen-addero is defrel outside of run-tests
   (test-equal? "106" (run* (s) (gen-addero 1 '(0 1 1) '(1 1) s)) '((0 1 0 1)))
+
+  ; +o is defrel outside of run-tests
+  (test-equal? "114" (run* (x y) (+o x y '(1 0 1)))
+    '(((1 0 1) ())
+      (() (1 0 1))
+      ((1) (0 0 1))
+      ((0 0 1) (1))
+      ((0 1) (1 1))
+      ((1 1) (0 1))))
+
+  ; -o is defrel outside of run-tests
+  (test-equal? "117" (run* (q) (-o '(0 0 0 1) '(1 0 1) q)) '((1 1)))
+  (test-equal? "118" (run* (q) (-o '(0 1 1) '(0 1 1) q)) '(()))
+  (test-equal? "119" (run* (q) (-o '(1 0 1) '(0 0 0 1) q)) '()) ; negative is not defined
+  
+  (test-equal? "+o extra" (run 3 (x y z) (+o x y z)) '((_.0 () _.0) (() (_.0 . _.1) (_.0 . _.1)) ((1) (1) (0 1))))
+  (test-equal? "-o extra" (run 3 (x y z) (-o x y z)) '((_.0 _.0 ()) ((_.0 . _.1) () (_.0 . _.1)) ((0 1) (1) (1))))
  ))
