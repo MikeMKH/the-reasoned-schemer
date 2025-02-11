@@ -94,6 +94,20 @@
 (defrel (-o n m k)
   (+o m k n))
 
+; 120
+ (define (length l)
+   (cond
+     ((null? l) 0)
+     (#t (+ 1 (length (cdr l))))))
+
+(defrel (lengtho l n)
+  (conde
+    ((nullo l) (== '() n))
+    ((fresh (d res)
+       (cdro l d)
+       (+o '(1) res n)
+       (lengtho d res)))))
+
 (run-tests
  (test-suite "chapter 7"
   ; bit-xoro is defrel outside of run-tests
@@ -174,4 +188,12 @@
   
   (test-equal? "+o extra" (run 3 (x y z) (+o x y z)) '((_.0 () _.0) (() (_.0 . _.1) (_.0 . _.1)) ((1) (1) (0 1))))
   (test-equal? "-o extra" (run 3 (x y z) (-o x y z)) '((_.0 _.0 ()) ((_.0 . _.1) () (_.0 . _.1)) ((0 1) (1) (1))))
+
+  ; lengtho is defrel outside of run-tests
+  (test-equal? "121" (run 1 (n) (lengtho '(jicama rhubarb guava) n)) '((1 1)))
+  (test-equal? "122" (run* (ls) (lengtho ls '(1 0 1))) '((_.0 _.1 _.2 _.3 _.4)))
+  (test-equal? "123" (run* (q) (lengtho '(1 0 1) 3)) '())
+  (test-equal? "123 extra" (run* (q) (lengtho '(1 0 1) (build-num 3))) '(_.0))
+  (test-equal? "124" (run 3 (q) (lengtho q q)) '(() (1) (0 1)))
+  ;(test-equal? "125" (run 4 (q) (lengtho q q)) '(() (1) (0 1) nothing-else)) ; there is not a 4th
  ))
