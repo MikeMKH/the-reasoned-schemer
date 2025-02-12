@@ -13,10 +13,118 @@
 (define s (== #t #t))
 (define u (== #t #f))
 
+(defrel (bit-xoro x y r)
+  (conde
+   ((== 0 x) (== 0 y) (== 0 r))
+   ((== 0 x) (== 1 y) (== 1 r))
+   ((== 1 x) (== 0 y) (== 1 r))
+   ((== 1 x) (== 1 y) (== 0 r))))
+
+(defrel (bit-ando x y r)
+  (conde
+   ((== 0 x) (== 0 y) (== 0 r))
+   ((== 0 x) (== 1 y) (== 0 r))
+   ((== 1 x) (== 0 y) (== 0 r))
+   ((== 1 x) (== 1 y) (== 1 r))))
+
+(defrel (half-addero x y r c)
+  (bit-xoro x y r)
+  (bit-ando x y c))
+
+(defrel (full-addero b x y r c)
+  (fresh (w xy wz)
+    (half-addero x y w xy)
+    (half-addero w b r wz)
+    (bit-xoro xy wz c)))
+
+(defrel (addero b n m r)
+  (conde
+   ((== 0 b) (== '() m) (== n r))
+   ((== 0 b) (== '() n) (== m r) (poso m))
+   ((== 1 b) (== '() m) (addero 0 n '(1) r))
+   ((== 1 b) (== '() n) (poso m) (addero 0 '(1) m r))
+   ((== '(1) n) (== '(1) m)
+     (fresh (a c)
+       (== `(,a ,c) r)
+       (full-addero b 1 1 a c)))
+   ((== '(1) n) (gen-addero b n m r))
+   ((== '(1) m) (>1o n) (>1o r) (addero b '(1) n r))
+   ((>1o n) (gen-addero b n m r))))
+
+(defrel (gen-addero b n m r)
+  (fresh (a c d e x y z)
+    (== `(,a . ,x) n)
+    (== `(,d . ,y) m) (poso y)
+    (== `(,c . ,z) r) (poso z)
+    (full-addero b a d c e)
+    (addero e x y z)))
+
+(defrel (+o n m k)
+  (addero 0 n m k))
+
 (require (except-in rackunit fail))
 (require rackunit/text-ui)
 
+; 9
+(defrel (*o n m p)
+  (conde
+   ((== '() n) (== '() p))
+   ((poso n) (== '() m) (== '() p))
+   ((== '(1) n) (poso m) (== m p))
+   ((>1o n) (== '(1) m) (== n p))
+   ((fresh (x z)
+      (== `(0 . ,x) n) (poso x)
+      (== `(0 . ,z) p) (poso z)
+      (>1o m)
+      (*o x m z)))
+   ((fresh (x y)
+      (== `(1 . ,x) n) (poso x)
+      (== `(0 . ,y) m) (poso y)
+      (*o m n p)))
+   ((fresh (x y)
+      (== `(1 . ,x) n) (poso x)
+      (== `(1 . ,y) m) (poso y)
+      (odd-*o x n m p)))))
+
+; 17
+(defrel (odd-*o x n m p)
+  (fresh (q)
+    (bound-*o q p n m)
+    (*o x m q)
+    (+o `(0 . ,q) m p)))
+
+; 24
+(defrel (bound-*o q p n m)
+  (conde
+   ((== '() q) (poso p))
+   ((fresh (a0 a1 a2 a3 x y z)
+      (== `(,a0 . ,x) q)
+      (== `(,a1 . ,y) p)
+      (conde
+       ((== '() n)
+        (== `(,a2 . ,z) m)
+        (bound-*o x y z'()))
+       ((== `(,a3 . ,z) n)
+        (bound-*o x y z m)))))))
+
 (run-tests
  (test-suite "chapter 8"
-  (test-equal? "init" (run* (q) (== (+ 1 2) 3)) '(_.0))
+  ; *o is defrel outside of run-tests
+  (test-equal? "1" (run 10 (x y r) (*o x y r))
+    '((() _.0 ())
+      ((_.0 . _.1) () ())
+      ((1) (_.0 . _.1) (_.0 . _.1))
+      ((_.0 _.1 . _.2) (1) (_.0 _.1 . _.2))
+      ((0 1) (_.0 _.1 . _.2) (0 _.0 _.1 . _.2))
+      ((0 0 1) (_.0 _.1 . _.2) (0 0 _.0 _.1 . _.2))
+      ((1 _.0 . _.1) (0 1) (0 1 _.0 . _.1))
+      ((0 0 0 1) (_.0 _.1 . _.2) (0 0 0 _.0 _.1 . _.2))
+      ((1 _.0 . _.1) (0 0 1) (0 0 1 _.0 . _.1))
+      ((0 1 _.0 . _.1) (0 1) (0 0 1 _.0 . _.1))))
+  (test-equal? "3" (run* (p) (*o '(0 1) '(0 0 1) p)) '((0 0 0 1))) ; related to 5th value above '((0 1) (_.0 _.1 . _.2) (0 _.0 _.1 . _.2))
+  (test-equal? "8" (run 1 (x y r) (== `(,x ,y ,r) '((1 1) (1 1) (1 0 0 1))) (*o x y r)) '(((1 1) (1 1) (1 0 0 1))))
+  (test-equal? "19" (run 1 (n m) (*o n m '(1))) '(((1) (1))))
+  (test-equal? "20" (run 1 (n m) (>1o n) (>1o m) (*o n m '(1 1))) '())
+  (test-equal? "25" (run 2 (n m) (*o n m '(1))) '(((1) (1))))
+  (test-equal? "26" (run* (p) (*o '(1 1 1) '(1 1 1 1 1 1) p)) '((1 0 0 1 1 1 0 1 1)))
  ))
