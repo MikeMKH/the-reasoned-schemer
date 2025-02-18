@@ -133,6 +133,32 @@
    ((=lo n m))
    ((<lo n m))))
 
+; 46
+(defrel (<o n m)
+  (conde
+   ((<lo n m))
+   ((=lo n m)
+    (fresh (x)
+      (poso x)
+      (+o n x m)))))
+
+(defrel (<=o n m)
+  (conde
+   ((== n m))
+   ((<o n m))))
+
+; 54
+(defrel (/o n m q r)
+  (conde
+   ; <o are needed for backtracking
+   ((== '() q) (== n r) (<o n m))
+   ((== '(1) q) (== '() r) (== n m) (<o r m))
+   ((<o m n) (<o r m)
+     (fresh (mq)
+       (<=lo mq n)
+       (*o m q mq)
+       (+o mq r n)))))
+
 (run-tests
  (test-suite "chapter 8"
   ; *o is defrel outside of run-tests
@@ -221,4 +247,20 @@
       ((_.0 _.1 1) (_.2 _.3 1))
       ((_.0 _.1 1) (_.2 _.3 _.4 _.5 . _.6))
       ((_.0 _.1 _.2 1) (_.3 _.4 _.5 1))))
+
+  ; <o is defrel outside of run-tests
+  (test-equal? "47" (run* (q) (<o '(1 0 1) '(1 1 1))) '(_.0))
+  (test-equal? "48" (run* (q) (<o '(1 1 1) '(1 0 1))) '())
+  (test-equal? "49" (run* (q) (<o '(1 0 1) '(1 0 1))) '())
+  (test-equal? "50" (run 6 (n) (<o n '(1 0 1))) '(() (1) (_.0 1) (0 0 1)))
+  (test-equal? "51" (run 6 (m) (<o '(1 0 1) m)) '((_.0 _.1 _.2 _.3 . _.4) (0 1 1) (1 1 1)))
+  ;(test-equal? "52" (run* (n) (<o n n)) '(endless-nothing)) ; no value can meet this condition, same as 39
+
+  ; /o is defrel outside of run-tests
+  (test-equal? "53" (run 4 (n m q r) (/o n m q r))
+    '((() (_.0 . _.1) () ())
+      ((_.0 . _.1) (_.0 . _.1) (1) ())
+      ((1) (_.0 _.1 . _.2) () (1))
+      ((_.0 1) (_.1 _.2 _.3 . _.4) () (_.0 1))))
+  (test-equal? "62" (run* (m) (fresh (r) (/o '(1 0 1) m '(1 1 1) r))) '())
  ))
