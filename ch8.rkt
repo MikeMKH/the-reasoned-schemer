@@ -159,6 +159,31 @@
        (*o m q mq)
        (+o mq r n)))))
 
+; 69
+(defrel (splito n r l h)
+  (conde
+   ((== '() n) (== '() h) (== '() l))
+   ((fresh (b n^)
+      (== `(0 ,b . ,n^) n) (== '() r)
+      (== `(,b . ,n^) h) (== '() l)))
+   ((fresh (n^)
+      (== `(1 . ,n^) n) (== '() r)
+      (== n^ h) (== '(1) l)))
+   ((fresh (b n^ a r^)
+      (== `(0 ,b . ,n^) n)
+      (== `(,a . ,r^) r) (== '() l)
+      (splito `(,b . ,n^) r^ '() h)))
+   ((fresh (n^ a r^)
+      (== `(1 . ,n^) n)
+      (== `(,a . ,r^) r) (== '(1) l)
+      (splito n^ r^ '() h)))
+   ((fresh (b n^ a r^ l^)
+      (== `(,b . ,n^) n)
+      (== `(,a . ,r^) r)
+      (== `(,b . ,l^) l)
+      (poso l^)
+      (splito n^ r^ l^ h)))))
+
 (run-tests
  (test-suite "chapter 8"
   ; *o is defrel outside of run-tests
@@ -263,4 +288,18 @@
       ((1) (_.0 _.1 . _.2) () (1))
       ((_.0 1) (_.1 _.2 _.3 . _.4) () (_.0 1))))
   (test-equal? "62" (run* (m) (fresh (r) (/o '(1 0 1) m '(1 1 1) r))) '())
+  ;(test-equal? "66" (run 3 (y z) (/o `(1 0 . ,y) '(0 1) z '())) '(endless-nothing)) ; no value can meet this condition
+
+  ; splito is defrel outside of run-tests
+  (test-equal? "73" (run* (l h) (splito '(0 0 1 0 1) '() l h)) '((() (0 1 0 1))))
+  (test-equal? "74" (run* (l h) (splito '(0 0 1 0 1) '(1) l h)) '((() (1 0 1))))
+  (test-equal? "75" (run* (l h) (splito '(0 0 1 0 1) '(0 1) l h)) '(((0 0 1) (0 1))))
+  (test-equal? "76" (run* (l h) (splito '(0 0 1 0 1) '(1 1) l h)) '(((0 0 1) (0 1))))
+  (test-equal? "77" (run* (r l h) (splito '(0 0 1 0 1) r l h))
+    '((() () (0 1 0 1))
+      ((_.0) () (1 0 1))
+      ((_.0 _.1) (0 0 1) (0 1))
+      ((_.0 _.1 _.2) (0 0 1) (1))
+      ((_.0 _.1 _.2 _.3) (0 0 1 0 1) ())
+      ((_.0 _.1 _.2 _.3 _.4 . _.5) (0 0 1 0 1) ())))
  ))
