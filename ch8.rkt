@@ -62,6 +62,9 @@
 (defrel (+o n m k)
   (addero 0 n m k))
 
+(defrel (-o n m k)
+  (+o k m n))
+
 (require (except-in rackunit fail))
 (require rackunit/text-ui)
 
@@ -148,7 +151,7 @@
    ((<o n m))))
 
 ; 54
-(defrel (/o n m q r)
+(defrel (/o-1st n m q r)
   (conde
    ; <o are needed for backtracking
    ((== '() q) (== n r) (<o n m))
@@ -183,6 +186,29 @@
       (== `(,b . ,l^) l)
       (poso l^)
       (splito n^ r^ l^ h)))))
+
+; 81
+(defrel (/o n m q r)
+  (conde
+   ((== '() q) (== r n) (<o n m))
+   ((== '(1) q) (=lo m n) (+o r n m) (<o r m))
+   ((poso q) (<lo m n) (<o r m)
+    (n-wider-than-mo n m q r))))
+
+(defrel (n-wider-than-mo n m q r)
+  (fresh (n-high n-low q-high q-low)
+    (fresh (mq-low mrq-low rr r-high)
+      (splito n r n-low n-high)
+      (splito q r q-low q-high)
+      (conde
+       ((== '() n-high) (== '() q-high)
+        (-o n-low r mq-low) (*o m q-low mq-low))
+       ((poso n-high)
+        (*o m q-low mq-low)
+        (+o r mq-low mrq-low)
+        (-o mrq-low n-low rr)
+        (splito rr r '() r-high)
+        (/o n-high m q-high r-high))))))
 
 (run-tests
  (test-suite "chapter 8"
@@ -282,13 +308,13 @@
   ;(test-equal? "52" (run* (n) (<o n n)) '(endless-nothing)) ; no value can meet this condition, same as 39
 
   ; /o is defrel outside of run-tests
-  (test-equal? "53" (run 4 (n m q r) (/o n m q r))
+  (test-equal? "53" (run 4 (n m q r) (/o-1st n m q r))
     '((() (_.0 . _.1) () ())
       ((_.0 . _.1) (_.0 . _.1) (1) ())
       ((1) (_.0 _.1 . _.2) () (1))
       ((_.0 1) (_.1 _.2 _.3 . _.4) () (_.0 1))))
   (test-equal? "62" (run* (m) (fresh (r) (/o '(1 0 1) m '(1 1 1) r))) '())
-  ;(test-equal? "66" (run 3 (y z) (/o `(1 0 . ,y) '(0 1) z '())) '(endless-nothing)) ; no value can meet this condition
+  ;(test-equal? "66" (run 3 (y z) (/o-1st `(1 0 . ,y) '(0 1) z '(endless-nothing))) '()) ; no value can meet this condition
 
   ; splito is defrel outside of run-tests
   (test-equal? "73" (run* (l h) (splito '(0 0 1 0 1) '() l h)) '((() (0 1 0 1))))
@@ -302,4 +328,5 @@
       ((_.0 _.1 _.2) (0 0 1) (1))
       ((_.0 _.1 _.2 _.3) (0 0 1 0 1) ())
       ((_.0 _.1 _.2 _.3 _.4 . _.5) (0 0 1 0 1) ())))
+  (test-equal? "82" (run 3 (y z) (/o `(1 0 . ,y) '(0 1) z '())) '())
  ))
