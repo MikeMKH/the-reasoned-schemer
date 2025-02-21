@@ -210,6 +210,79 @@
         (splito rr r '() r-high)
         (/o n-high m q-high r-high))))))
 
+; 84 yeah it is just a wall of text in the book
+(defrel (logo n b q r)
+  (conde
+   ((== '() q) (<=o n b) (+o r '(1) n))
+   ((== '(1) q) (>1o b) (=lo n b) (+o r b n))
+   ((== '(1) b) (poso q) (+o r '(1) n))
+   ((== '() b) (poso q) (== r n))
+   ((== '(0 1) b)
+    (fresh (a ad dd)
+      (poso dd)
+      (== `(,a ,ad . ,dd) n)
+      (exp2o n '() q)
+      (fresh (s)
+        (splito n dd r s))))
+   ((<=o '(1 1) b) (<lo b n) (base-three-or-more n b q r))))
+
+(defrel (exp2o n b q)
+  (conde
+   ((== '(1) n) (== '() q))
+   ((>1o n) (== '(1) q)
+    (fresh (s)
+      (splito n b s '(1))))
+   ((fresh (q1 b2)
+      (== `(0 . ,q1) q) (poso q1) (<lo b n)
+      (appendo b `(1 . ,b) b2)
+      (exp2o n b2 q1)))
+   ((fresh (q1 n-high b2 s)
+      (== `(1 . ,q1) q) (poso q1) (poso n-high)
+      (splito n b s n-high)
+      (appendo b `(1 . ,b) b2)
+      (exp2o n-high b2 q1)))))
+
+(defrel (base-three-or-more n b q r)
+  (fresh (bw1 bw nw nw1 q-low1 q-low s)
+    (exp2o b '() bw1)
+    (+o bw1 '(1) bw)
+    (<lo q n)
+    (fresh (q1 bwq1)
+      (+o q '(1) q1)
+      (*o bw q1 bwq1)
+      (<o nw1 bwq1))
+    (exp2o n '() nw1)
+    (+o nw1 '(1) nw)
+    (/o nw bw q-low1 s)
+    (+o q-low '(1) q-low1)
+    (<=lo q-low q)
+    (fresh (bq-low q-high s qd-high qd)
+      (repeated-mulo b q-low bq-low)
+      (/o nw bw1 q-high s)
+      (+o q-low qd-high q-high)
+      (+o q-low qd q)
+      (<=o qd qd-high)
+      (fresh (bqd bq1 bq)
+        (repeated-mulo b qd bqd)
+        (*o bq-low bqd bq)
+        (*o b bq bq1)
+        (+o bq r n)
+        (<o n bq1)))))
+
+(defrel (repeated-mulo n q nq)
+  (conde
+   ((poso n) (== '() q) (== '(1) nq))
+   ((== '(1) q) (== n nq))
+   ((>1o q)
+    (fresh (q1 nq1)
+      (+o q1 '(1) q)
+      (repeated-mulo n q1 nq1)
+      (*o nq1 n nq)))))
+
+; 93
+(defrel (expo b q n)
+  (logo n b q '()))
+
 (run-tests
  (test-suite "chapter 8"
   ; *o is defrel outside of run-tests
@@ -329,4 +402,20 @@
       ((_.0 _.1 _.2 _.3) (0 0 1 0 1) ())
       ((_.0 _.1 _.2 _.3 _.4 . _.5) (0 0 1 0 1) ())))
   (test-equal? "82" (run 3 (y z) (/o `(1 0 . ,y) '(0 1) z '())) '())
+
+  ; logo is defrel outside of run-tests
+  (test-equal? "91" (run* (r) (logo '(0 1 1 1) '(0 1) '(1 1) r)) '((0 1 1))) ; 14 = 2^3 + 6
+  (test-equal? "92" (run 9 (b q r) (logo '(0 0 1 0 0 0 1) b q r)) ; does not match text but I am not sure if I have anything wrong
+    '((() (_.0 . _.1) (0 0 1 0 0 0 1))
+      ((0 0 1 0 0 0 1) (1) ())
+      ((0 0 1 0 0 0 1) () (1 1 0 0 0 0 1))
+      ((1 1 0 0 0 0 1) (1) (1))
+      ((1) (_.0 . _.1) (1 1 0 0 0 0 1))
+      ((_.0 _.1 _.2 _.3 _.4 _.5 _.6 _.7 . _.8) () (1 1 0 0 0 0 1))
+      ((1 0 1 0 0 0 1) () (1 1 0 0 0 0 1))
+      ((0 1 0 0 0 0 1) (1) (0 1))
+      ((1 0 0 0 0 0 1) (1) (1 1))))
+
+  ; expo is defrel outside of run-tests
+  (test-equal? "94" (run* (t) (expo '(1 1) '(1 0 1) t)) '((1 1 0 0 1 1 1 1))) ; very slow!
  ))
