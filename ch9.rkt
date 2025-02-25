@@ -36,4 +36,11 @@
   ; not-pastao is defrel outside of run-tests
   (test-equal? "11" (run* (x) (conda ((not-pastao x) u) ((== 'spaghetti x) s))) '(spaghetti))
   (test-equal? "12" (run* (x) (== 'spaghetti x) (conda ((not-pastao x) u) ((== 'spaghetti x) s))) '())
+  ;(test-equal? "13" (run* (q) (conda (alwayso s) (s u))) '(endless-loop)) ; builds an infinite list of _.0
+
+  (test-equal? "14" (run* (q) (condu (alwayso s) (s u))) '(_.0))
+  ;(test-equal? "15" (run* (q) (condu (s alwayso) (s u))) '(endless-loop))
+  ;(test-equal? "17" (run 1 (q) (conda (alwayso s) (s u)) u) '(endless-loop)) ; continously fails
+  (test-equal? "17" (run 1 (q) (condu (alwayso s) (s u)) u) '())
+  
  ))
