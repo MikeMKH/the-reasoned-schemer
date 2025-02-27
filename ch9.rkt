@@ -103,13 +103,32 @@
      (== j y)
      (== k z))))
 
-; 43
+; 58
 (defrel (enumerate+o r n)
   (fresh (i j k)
     (bumpo n i)
     (bumpo n j)
     (+o i j k)
-    (gen&test+o i j k)
+    (onceo
+     (fresh (x y z)
+       (+o x y z)
+       (== i x)
+       (== j y)
+       (== k z)))
+    (== `(,i ,j ,k) r)))
+
+; 59
+(defrel (enumerateo op r n)
+  (fresh (i j k)
+    (bumpo n i)
+    (bumpo n j)
+    (op i j k)
+    (onceo
+     (fresh (x y z)
+       (op x y z)
+       (== i x)
+       (== j y)
+       (== k z)))
     (== `(,i ,j ,k) r)))
 
 (run-tests
@@ -165,4 +184,17 @@
      (() (1) (1))
      (() () ())))
   (test-equal? "56" (run 1 (s) (enumerate+o s '(1 1 1))) '(((1 1 1) (1 1 1) (0 1 1 1))))
+
+  ; enumerateo is defrel outside of run-tests
+  (test-equal? "-o" (run* (s) (enumerateo -o s '(1 1)))
+    '(((1 1) (1 1) ())
+      ((1 1) (0 1) (1))
+      ((1 1) () (1 1))
+      ((0 1) (0 1) ())
+      ((1 1) (1) (0 1))
+      ((0 1) (1) (1))
+      ((0 1) () (0 1))
+      ((1) (1) ())
+      ((1) () (1))
+      (() () ())))
  ))
