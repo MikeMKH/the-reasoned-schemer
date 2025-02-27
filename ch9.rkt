@@ -103,6 +103,15 @@
      (== j y)
      (== k z))))
 
+; 43
+(defrel (enumerate+o r n)
+  (fresh (i j k)
+    (bumpo n i)
+    (bumpo n j)
+    (+o i j k)
+    (gen&test+o i j k)
+    (== `(,i ,j ,k) r)))
+
 (run-tests
  (test-suite "chapter 9"
   (test-equal? "1" (run* (q) (conda (u s) (s u))) '())
@@ -136,4 +145,24 @@
   ; gen&test+o is defrel outside of run-tests
   (test-equal? "27" (run* (q) (gen&test+o '(0 0 1) '(1 1) '(1 1 1))) '(_.0))
   ;(test-equal? "40" (run 1 (q) (gen&test+o '(0 0 1) '(1 1) '(0 1 1))) '(endless-loop)) ; continously fails
+
+  ; enumerate+o is defrel outside of run-tests
+  (test-equal? "43" (run* (s) (enumerate+o s '(1 1)))
+    '(((1 1) () (1 1))
+     ((1 1) (1 1) (0 1 1))
+     ((1 1) (0 1) (1 0 1))
+     ((0 1) (1 1) (1 0 1))
+     ((1 1) (1) (0 0 1))
+     ((1) (1 1) (0 0 1))
+     (() (1 1) (1 1))
+     ((0 1) () (0 1))
+     ((0 1) (0 1) (0 0 1))
+     ((0 1) (1) (1 1))
+     ((1) (0 1) (1 1))
+     ((1) (1) (0 1))
+     ((1) () (1))
+     (() (0 1) (0 1))
+     (() (1) (1))
+     (() () ())))
+  (test-equal? "56" (run 1 (s) (enumerate+o s '(1 1 1))) '(((1 1 1) (1 1 1) (0 1 1 1))))
  ))
