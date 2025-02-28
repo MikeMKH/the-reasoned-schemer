@@ -1,22 +1,28 @@
 #lang racket
-(require cKanren/miniKanren)
-
-; https://github.com/rymaju/mykanren/blob/c56318625319b598c0e05cf993e8aafabee83187/mykanren.rkt#L360C1-L366C34
-(define-syntax defrel
-  (syntax-rules ()
-    ((defrel (name x ...) g ...)
-     (define (name x ...)
-       (lambda (s)
-         (lambda ()
-           ((conj g ...) s)))))))
-
-(define s (== #t #t))
-(define u (== #t #f))
 
 (require (except-in rackunit fail))
 (require rackunit/text-ui)
 
+; 4
+(define (var name) (vector name))
+(define (var? x) (vector? x))
+
+; 5
+(define u (var 'u))
+(define v (var 'v))
+(define w (var 'w))
+
+(define x (var 'x))
+(define y (var 'y))
+(define z (var 'z))
+
+; 11
+(define empty-s '())
+
 (run-tests
  (test-suite "chapter 10"
-  (test-equal? "1" (run* (q) (conda (u s) (s u))) '())
+  (test-equal? "6" (cdr `(,z . a)) 'a)
+  (test-equal? "7" (cdr `(,z . b)) 'b)
+  (test-equal? "8" (cdr `(,z . (,x e ,y))) `(,x e ,y))
+  (test-equal? "10" `((,x . ,z)) '((#(x) . #(z))))
  ))
