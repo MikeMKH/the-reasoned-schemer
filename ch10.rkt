@@ -26,6 +26,21 @@
     ((pair? a) (walk (cdr a) s))
     (else v))))
 
+; 20
+(define (ext-s x v s)
+  (cond
+    ((occurs? x v s) #f)
+    (else (cons `(,x . ,v) s))))
+
+(define (occurs? x v s)
+  (let ((v (walk v s)))
+    (cond
+      ((var? v) (eqv? v x))
+      ((pair? v)
+       (or (occurs? x (car v) s)
+           (occurs? v (cdr v) s)))
+      (else #f))))
+
 (run-tests
  (test-suite "chapter 10"
   (test-equal? "6" (cdr `(,z . a)) 'a)
@@ -39,4 +54,13 @@
   (test-equal? "16 v" (walk v `((,x . ,y) (,v . ,x) (,w . ,x))) y)
   (test-equal? "16 w" (walk w `((,x . ,y) (,v . ,x) (,w . ,x))) y)
   (test-equal? "17" (walk w `((,x . b) (,z . ,y) (,w . (,x e ,z)))) `(,x e ,z))
+  (test-equal? "24" (occurs? x x '()) #t)
+  (test-equal? "25" (occurs? x `(,y) `((,y . ,x))) #t)
+  (test-equal? "26" (ext-s x `(,x) empty-s) #f)
+  (test-equal? "27" (ext-s x `(,y) `((,y . ,x))) #f)
+  (test-equal? "28"
+     (let ((s `((,z .  ,x) (,y . ,z))))
+       (let ((s (ext-s x 'e s)))
+         (and s (walk y s))))
+     'e)
  ))
