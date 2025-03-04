@@ -41,6 +41,18 @@
            (occurs? v (cdr v) s)))
       (else #f))))
 
+; 29
+(define (unify u v s)
+  (let ((u (walk u s)) (v (walk v s)))
+    (cond
+      ((eqv? u v) s)
+      ((var? u) (ext-s u v s))
+      ((var? v) (ext-s v u s))
+      ((and (pair? u) (pair? v))
+       (let ((s (unify (car u) (car v) s)))
+         (and s (unify (cdr u) (cdr v) s))))
+      (else #f))))
+
 (run-tests
  (test-suite "chapter 10"
   (test-equal? "6" (cdr `(,z . a)) 'a)
