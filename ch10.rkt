@@ -8,7 +8,7 @@
 (define (var? x) (vector? x))
 
 ; 5
-(define u (var 'u))
+;(define u (var 'u)) ; we define u as unsuccessful below
 (define v (var 'v))
 (define w (var 'w))
 
@@ -53,6 +53,21 @@
          (and s (unify (cdr u) (cdr v) s))))
       (else #f))))
 
+; 43
+(define (== u v)
+  (lambda (s)
+    (let ((s (unify u v s)))
+      (if s `(,s) '()))))
+
+; 44
+(define s
+  (lambda (s1)
+    `(,s1)))
+
+(define u
+  (lambda (s)
+    '()))
+
 (run-tests
  (test-suite "chapter 10"
   (test-equal? "6" (cdr `(,z . a)) 'a)
@@ -75,4 +90,8 @@
        (let ((s (ext-s x 'e s)))
          (and s (walk y s))))
      'e)
+  (test-equal? "48" ((== #t #f) empty-s) '())
+  (test-equal? "49" (u empty-s) '())
+  (test-equal? "50" (s empty-s) '(()))
+  (test-equal? "51" ((== x y) empty-s) `(((,x . ,y))))
  ))
