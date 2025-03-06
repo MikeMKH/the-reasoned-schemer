@@ -68,6 +68,26 @@
   (lambda (s)
     '()))
 
+; 54
+(define (disj2 g1 g2)
+  (lambda (s)
+    (append8 (g1 s) (g2 s))))
+
+; 56
+(define (append8 s8 t8)
+  (cond
+    ((null? s8) t8)
+    ((pair? s8)
+     (cons (car s8)
+           (append8 (cdr s8) t8)))
+    (else (lambda () (append8 t8 (s8))))))
+
+; 61
+(define (nevero)
+  (lambda (s)
+    (lambda ()
+      ((nevero) s))))
+
 (run-tests
  (test-suite "chapter 10"
   (test-equal? "6" (cdr `(,z . a)) 'a)
@@ -94,4 +114,10 @@
   (test-equal? "49" (u empty-s) '())
   (test-equal? "50" (s empty-s) '(()))
   (test-equal? "51" ((== x y) empty-s) `(((,x . ,y))))
+  (test-equal? "53" ((disj2 (== 'olive x) (== 'oil x)) empty-s) `(((,x . olive)) ((,x . oil))))
+  ; not really sure how to unit test these
+  (test-not-false "62" ((nevero) empty-s))
+  (test-not-false "63" (let ((s8 ((disj2 (== 'olive x) (nevero)) empty-s))) s8)) ; it produces `(((,x . olive)) . (nevero))
+  (test-not-false "64" (let ((s8 ((disj2 (nevero) (== 'olive x)) empty-s))) s8)) ; it produces ((lambda () (append8 (nevero) ((,x . olive)))))
+  (test-not-false "66" (let ((s8 ((disj2 (nevero) (== 'olive x)) empty-s))) (s8))) ; it produces `(((,x . olive)) . (nevero))
  ))
