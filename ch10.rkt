@@ -71,16 +71,16 @@
 ; 54
 (define (disj2 g1 g2)
   (lambda (s)
-    (append8 (g1 s) (g2 s))))
+    (append-inf (g1 s) (g2 s))))
 
 ; 56
-(define (append8 s8 t8)
+(define (append-inf s-inf t-inf)
   (cond
-    ((null? s8) t8)
-    ((pair? s8)
-     (cons (car s8)
-           (append8 (cdr s8) t8)))
-    (else (lambda () (append8 t8 (s8))))))
+    ((null? s-inf) t-inf)
+    ((pair? s-inf)
+     (cons (car s-inf)
+           (append-inf (cdr s-inf) t-inf)))
+    (else (lambda () (append-inf t-inf (s-inf))))))
 
 ; 61
 (define (nevero)
