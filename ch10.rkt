@@ -88,6 +88,12 @@
     (lambda ()
       ((nevero) s))))
 
+; 69
+(define (alwayso)
+  (lambda (s)
+    (lambda ()
+      ((disj2 success (alwayso)) s))))
+
 (run-tests
  (test-suite "chapter 10"
   (test-equal? "6" (cdr `(,z . a)) 'a)
@@ -120,4 +126,5 @@
   (test-not-false "63" (let ((s8 ((disj2 (== 'olive x) (nevero)) empty-s))) s8)) ; it produces `(((,x . olive)) . (nevero))
   (test-not-false "64" (let ((s8 ((disj2 (nevero) (== 'olive x)) empty-s))) s8)) ; it produces ((lambda () (append8 (nevero) ((,x . olive)))))
   (test-not-false "66" (let ((s8 ((disj2 (nevero) (== 'olive x)) empty-s))) (s8))) ; it produces `(((,x . olive)) . (nevero))
+  (test-equal? "69" (car (((alwayso) empty-s))) '())
  ))
