@@ -60,11 +60,11 @@
       (if s `(,s) '()))))
 
 ; 44
-(define s
+(define success
   (lambda (s1)
     `(,s1)))
 
-(define u
+(define unsuccessful
   (lambda (s)
     '()))
 
@@ -111,8 +111,8 @@
          (and s (walk y s))))
      'e)
   (test-equal? "48" ((== #t #f) empty-s) '())
-  (test-equal? "49" (u empty-s) '())
-  (test-equal? "50" (s empty-s) '(()))
+  (test-equal? "49" (unsuccessful empty-s) '())
+  (test-equal? "50" (success empty-s) '(()))
   (test-equal? "51" ((== x y) empty-s) `(((,x . ,y))))
   (test-equal? "53" ((disj2 (== 'olive x) (== 'oil x)) empty-s) `(((,x . olive)) ((,x . oil))))
   ; not really sure how to unit test these
