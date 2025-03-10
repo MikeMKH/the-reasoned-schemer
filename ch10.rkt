@@ -94,6 +94,16 @@
     (lambda ()
       ((disj2 success (alwayso)) s))))
 
+; 74
+(define (take-inf n s-inf)
+  (cond
+    ((and n (zero? n)) '())
+    ((null? s-inf) '())
+    ((pair? s-inf)
+     (cons (car s-inf)
+           (take-inf (and n (sub1 n)) (cdr s-inf))))
+    (else (take-inf n (s-inf)))))
+
 (run-tests
  (test-suite "chapter 10"
   (test-equal? "6" (cdr `(,z . a)) 'a)
@@ -127,4 +137,12 @@
   (test-not-false "64" (let ((s8 ((disj2 (nevero) (== 'olive x)) empty-s))) s8)) ; it produces ((lambda () (append8 (nevero) ((,x . olive)))))
   (test-not-false "66" (let ((s8 ((disj2 (nevero) (== 'olive x)) empty-s))) (s8))) ; it produces `(((,x . olive)) . (nevero))
   (test-equal? "69" (car (((alwayso) empty-s))) '())
+  ;(test-equal? "75" (take-inf 1 (((nevero) empty-s))) '(endless-nothing)) ; endless loop on nevero
+  (test-equal? "76" (take-inf #f '(1 2 3)) '(1 2 3))
+  (test-equal? "77" (take-inf 3 (((alwayso) empty-s))) '(() () ()))
+  ;(test-equal? "78" (take-inf #f (((alwayso) empty-s))) '(endless-nothing)) ; endless loop on alwayso
+  (test-equal? "79"
+    (let ((k (length (take-inf 5 ((disj2 (== 'olive x) (== 'oil x)) empty-s))))) `(Found ,k not 5 substitutions))
+    '(Found 2 not 5 substitutions))
+  (test-equal? "80" (map length (take-inf 5 ((disj2 (== 'olive x) (== 'oil x)) empty-s))) '(1 1))
  ))
