@@ -104,6 +104,20 @@
            (take-inf (and n (sub1 n)) (cdr s-inf))))
     (else (take-inf n (s-inf)))))
 
+; 81
+(define (conj2 g1 g2)
+  (lambda (s)
+    (append-map-inf g2 (g1 s))))
+
+; 84
+(define (append-map-inf g s-inf)
+  (cond
+    ((null? s-inf) '())
+    ((pair? s-inf)
+     (append-inf (g (car s-inf))
+                 (append-map-inf g (cdr s-inf))))
+    (else (lambda () (append-map-inf g (s-inf))))))
+
 (run-tests
  (test-suite "chapter 10"
   (test-equal? "6" (cdr `(,z . a)) 'a)
@@ -133,9 +147,9 @@
   (test-equal? "53" ((disj2 (== 'olive x) (== 'oil x)) empty-s) `(((,x . olive)) ((,x . oil))))
   ; not really sure how to unit test these
   (test-not-false "62" ((nevero) empty-s))
-  (test-not-false "63" (let ((s8 ((disj2 (== 'olive x) (nevero)) empty-s))) s8)) ; it produces `(((,x . olive)) . (nevero))
-  (test-not-false "64" (let ((s8 ((disj2 (nevero) (== 'olive x)) empty-s))) s8)) ; it produces ((lambda () (append8 (nevero) ((,x . olive)))))
-  (test-not-false "66" (let ((s8 ((disj2 (nevero) (== 'olive x)) empty-s))) (s8))) ; it produces `(((,x . olive)) . (nevero))
+  (test-not-false "63" (let ((s-inf ((disj2 (== 'olive x) (nevero)) empty-s))) s-inf)) ; it produces `(((,x . olive)) . (nevero))
+  (test-not-false "64" (let ((s-inf ((disj2 (nevero) (== 'olive x)) empty-s))) s-inf)) ; it produces ((lambda () (append8 (nevero) ((,x . olive)))))
+  (test-not-false "66" (let ((s-inf ((disj2 (nevero) (== 'olive x)) empty-s))) (s-inf))) ; it produces `(((,x . olive)) . (nevero))
   (test-equal? "69" (car (((alwayso) empty-s))) '())
   ;(test-equal? "75" (take-inf 1 (((nevero) empty-s))) '(endless-nothing)) ; endless loop on nevero
   (test-equal? "76" (take-inf #f '(1 2 3)) '(1 2 3))
@@ -145,4 +159,6 @@
     (let ((k (length (take-inf 5 ((disj2 (== 'olive x) (== 'oil x)) empty-s))))) `(Found ,k not 5 substitutions))
     '(Found 2 not 5 substitutions))
   (test-equal? "80" (map length (take-inf 5 ((disj2 (== 'olive x) (== 'oil x)) empty-s))) '(1 1))
+  (test-equal? "conj2 test empty" ((conj2 (== 'olive x) (== 'oil x)) empty-s) '())
+  (test-equal? "conj2 test match" ((conj2 (== 'lily x) (== 'lily x)) empty-s) `(((,x . lily))))
  ))
