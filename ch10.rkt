@@ -118,6 +118,26 @@
                  (append-map-inf g (cdr s-inf))))
     (else (lambda () (append-map-inf g (s-inf))))))
 
+; 90
+(define (call/fresh name f)
+  (f (var name)))
+
+; 92
+(define (reify-name n)
+  (string->symbol
+   (string-append "_" (number->string n))))
+
+; 98
+(define (walk* v s)
+  (let ((v (walk v s)))
+    (cond
+      ((var? v) v)
+      ((pair? v)
+       (cons
+        (walk* (car v) s)
+        (walk* (cdr v) s)))
+      (else v))))
+
 (run-tests
  (test-suite "chapter 10"
   (test-equal? "6" (cdr `(,z . a)) 'a)
@@ -161,4 +181,5 @@
   (test-equal? "80" (map length (take-inf 5 ((disj2 (== 'olive x) (== 'oil x)) empty-s))) '(1 1))
   (test-equal? "conj2 test empty" ((conj2 (== 'olive x) (== 'oil x)) empty-s) '())
   (test-equal? "conj2 test match" ((conj2 (== 'lily x) (== 'lily x)) empty-s) `(((,x . lily))))
+  (test-equal? "91" (take-inf 1 ((call/fresh 'kiwi (lambda (fruit) (== 'plum fruit))) empty-s)) '(((#(kiwi) . plum))))
  ))
