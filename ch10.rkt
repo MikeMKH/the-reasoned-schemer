@@ -158,6 +158,10 @@
       (let ((r (reify-s v empty-s)))
         (walk* v r)))))
 
+; 115
+(define (run-goal n g)
+  (take-inf n (g empty-s)))
+
 (run-tests
  (test-suite "chapter 10"
   (test-equal? "6" (cdr `(,z . a)) 'a)
@@ -212,4 +216,5 @@
   (test-equal? "something is wrong with 113 in the text so we'll test with this"
                ((reify x) `((,x . (1 2 3 4 5 ,y)))) '(1 2 3 4 5 _0))
   (test-equal? "114" (map (reify x) (take-inf 5 ((disj2 (== 'olive x) (== 'oil x)) empty-s))) '(olive oil))
+  (test-equal? "115" (map (reify x) (run-goal 5 (disj2 (== 'olive x) (== 'oil x)))) '(olive oil))
  ))
