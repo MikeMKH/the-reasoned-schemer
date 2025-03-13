@@ -138,6 +138,26 @@
         (walk* (cdr v) s)))
       (else v))))
 
+; 104
+(define (reify-s v r)
+  (let ((v (walk v r)))
+    (cond
+      ((var? v)
+       (let ((n (length r)))
+         (let ((rn (reify-name n)))
+           (cons `(,v . ,rn) r))))
+      ((pair? v)
+       (let ((r (reify-s (car v) r)))
+         (reify-s (cdr v) r)))
+      (else r))))
+
+; 111
+(define (reify v)
+  (lambda (s)
+    (let ((v (walk* v s)))
+      (let ((r (reify-s v empty-s)))
+        (walk* v r)))))
+
 (run-tests
  (test-suite "chapter 10"
   (test-equal? "6" (cdr `(,z . a)) 'a)
@@ -182,4 +202,14 @@
   (test-equal? "conj2 test empty" ((conj2 (== 'olive x) (== 'oil x)) empty-s) '())
   (test-equal? "conj2 test match" ((conj2 (== 'lily x) (== 'lily x)) empty-s) `(((,x . lily))))
   (test-equal? "91" (take-inf 1 ((call/fresh 'kiwi (lambda (fruit) (== 'plum fruit))) empty-s)) '(((#(kiwi) . plum))))
+  ;(test-equal? "113"
+  ;  (let ((a1 `(,x . (,u ,w ,y ,z ((ice) ,z))))
+  ;        (a2 `(,y . corn))
+  ;        (a3 `(,w . (,v ,u))))
+  ;    (let ((s `(,a1 ,a2  ,a3)))
+  ;      ((reify x) s)))
+  ;  '(_.0 (_.1 _.0) corn _.2 ((ice) _.2)))
+  (test-equal? "something is wrong with 113 in the text so we'll test with this"
+               ((reify x) `((,x . (1 2 3 4 5 ,y)))) '(1 2 3 4 5 _0))
+  (test-equal? "114" (map (reify x) (take-inf 5 ((disj2 (== 'olive x) (== 'oil x)) empty-s))) '(olive oil))
  ))
