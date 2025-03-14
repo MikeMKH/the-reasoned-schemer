@@ -162,6 +162,9 @@
 (define (run-goal n g)
   (take-inf n (g empty-s)))
 
+; 116 appendo needs nullo conso which needs caro cdro which needs ...
+; 117 needs appendo
+
 (run-tests
  (test-suite "chapter 10"
   (test-equal? "6" (cdr `(,z . a)) 'a)
