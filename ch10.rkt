@@ -162,6 +162,28 @@
 (define (run-goal n g)
   (take-inf n (g empty-s)))
 
+; 116 appendo needs nullo conso which needs caro cdro which needs ...
+; 117 needs appendo
+
+; 126
+(define (ifte g1 g2 g3)
+  (lambda (s)
+    (let loop ((s-inf (g1 s)))
+      (cond
+        ((null? s-inf) (g3 s))
+        ((pair? s-inf) (append-map-inf g2 s-inf))
+        (else (lambda () (loop (s-inf))))))))
+
+; 131
+(define (once g)
+  (lambda (s)
+    (let loop ((s-inf (g s)))
+      (cond
+        ((null? s-inf) '())
+        ((pair? s-inf) (cons (car s-inf) '()))
+        (else (lambda () (loop (s-inf))))))))
+
+
 (run-tests
  (test-suite "chapter 10"
   (test-equal? "6" (cdr `(,z . a)) 'a)
@@ -217,4 +239,9 @@
                ((reify x) `((,x . (1 2 3 4 5 ,y)))) '(1 2 3 4 5 _0))
   (test-equal? "114" (map (reify x) (take-inf 5 ((disj2 (== 'olive x) (== 'oil x)) empty-s))) '(olive oil))
   (test-equal? "115" (map (reify x) (run-goal 5 (disj2 (== 'olive x) (== 'oil x)))) '(olive oil))
+  (test-equal? "121" ((ifte success (== #f y) (== #t y)) empty-s) `(((,y . #f))))
+  (test-equal? "122" ((ifte unsuccessful (== #f y) (== #t y)) empty-s) `(((,y . #t))))
+  (test-equal? "123" ((ifte (== #t x) (== #f y) (== #t y)) empty-s) `(((,y . #f) (,x . #t))))
+  (test-equal? "124" ((ifte (disj2 (== #t x) (== #f x)) (== #f y) (== #t y)) empty-s) `(((,y . #f) (,x . #t)) ((,y . #f) (,x . #f))))
+  (test-equal? "130" ((ifte (once (disj2 (== #t x) (== #f x))) (== #f y) (== #t y)) empty-s) `(((,y . #f) (,x . #t))))
  ))
