@@ -183,6 +183,64 @@
         ((pair? s-inf) (cons (car s-inf) '()))
         (else (lambda () (loop (s-inf))))))))
 
+; macros
+(define-syntax disj
+  (syntax-rules ()
+    ((disj) unsuccessful)
+    ((disj g) g)
+    ((disj g0 g ...) (disj2 g0 (disj2 g ...)))))
+
+(define-syntax conj
+  (syntax-rules ()
+    ((conj) success)
+    ((conj g) g)
+    ((conj g0 g ...) (conj2 g0 (conj2 g ...)))))
+
+(define-syntax defrel
+  (syntax-rules ()
+    ((defrel (name x ...) g ...)
+     (define (name x ...)
+       (lambda (s)
+         (lambda ()
+           ((conj g ...) s)))))))
+
+(define-syntax run
+  (syntax-rules ()
+    ((run n (x0 x ...) g ...)
+     (run n q (fresh (x0 x ...)
+                (== `(,x0 ,x ...) q) g ...)))
+    ((run n q g ...)
+     (let ((q (var 'q)))
+       (map (reify q)
+            (run-goal n (conj g ...)))))))
+
+(define-syntax run*
+  (syntax-rules ()
+    ((run* q g ...) (run #f q g ...))))
+
+(define-syntax fresh
+  (syntax-rules ()
+    ((fresh () g ...) (conj g ...))
+    ((fresh (x0 x ...) g ...)
+     (call/fresh 'x0
+       (lambda (x0)
+         (fresh (x ...) g ...))))))
+
+(define-syntax conde
+  (syntax-rules ()
+    ((conde (g ...) ...)
+     (disj (conj g ...) ...))))
+
+(define-syntax conda
+  (syntax-rules ()
+    ((conda (g0 g ...)) (conj g0 g ...))
+    ((conda (g0 g ...) ln ...)
+     (ifte g0 (conj g ...) (conda ln ...)))))
+
+(define-syntax condu
+  (syntax-rules ()
+    ((condu (g0 g ...) ...)
+     (conda ((once g0) g ...) ...))))
 
 (run-tests
  (test-suite "chapter 10"
